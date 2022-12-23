@@ -243,7 +243,8 @@ InModuleScope DataCollector {
 InModuleScope DataCollector {
     Describe 'Copy-File' {
         It 'should copy the file to the destination' {
-            Mock Copy-Item {}
+            Mock Copy_File {}
+            Mock Get-Item {}
 
             $node = [Xml]@"
                 <test>test.txt</test>
@@ -255,7 +256,8 @@ InModuleScope DataCollector {
 
         # test what happens if the file already exists
         It 'should not copy the file if it already exists' {
-            Mock Copy-Item {}
+            Mock Copy_File {}
+            Mock Get-Item {}
 
             $node = [Xml]@"
                 <test>test.txt</test>
@@ -271,7 +273,8 @@ InModuleScope DataCollector {
 
         # test the error handling
         It 'should throw an error if the file does not exist' {
-            Mock Copy-Item {}
+            Mock Copy_File {}
+            Mock Get-Item {}
 
             $node = [Xml]@"
                 <test>test2.txt</test>

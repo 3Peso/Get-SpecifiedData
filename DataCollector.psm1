@@ -134,6 +134,18 @@ function Initialize_DestinationPath {
         $script:variables[$script:DESTINATION] = $destinationPath
     }
 }
+
+# Function Copy_File which takes destination path as parameter
+# For the source it uses an object of type Systrm.IO.FileInfo
+# destination path is already complete and can be used directly
+# uses Copy-Item for copying
+function Copy_File {
+    param(
+        [System.IO.FileInfo]$source,
+        [string]$destination
+    )
+    Copy-Item -Path $source.FullName -Destination $destination
+}
 #endregion
 
 #region Public Functions
@@ -190,7 +202,9 @@ function Copy-File {
         $destinationFilePath = $script:variables[$script:DESTINATION] + $sourceFile
 
         Write-Verbose "Copying file from $sourceFilePath to $destinationFilePath"
-        Copy-Item -Path $sourceFilePath -Destination $destinationFilePath -Force
+        Get-Item -Path $sourceFilePath | ForEach-Object {
+            Copy_File -source $_ -destination $destinationFilePath
+        }
     } else {
         throw "File $sourceFilePath does not exist"
     }
