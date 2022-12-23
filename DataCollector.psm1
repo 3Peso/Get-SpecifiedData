@@ -7,6 +7,11 @@
 [string]$script:ACTIONTAG = "action-"
 [string]$script:MICROSOFT = "Microsoft*"
 [string]$script:SPERATOR_PLACEHOLDER = "_"
+$script:XML_PLACEHOLDERS = @{
+    "WILD-" = "*"
+    'LOCALFOLDER-' = "."
+}
+[string]$script:LOCALFOLDERPLACEHOLDER = "LOCALFOLDER-"
 #endregion Constants
 
 #region Variables
@@ -49,6 +54,24 @@ function Ensure_Seperator {
     return $path
 }
 
+# function that takes a string and replaces $script:XML_WILDCARD_PLACEHOLDER with "*"
+function Replace_XML_Placeholders {
+    param(
+        [string]$value
+    )
+
+    if ($null -ne $value -and $value -ne "") {
+        $script:XML_PLACEHOLDERS.Keys | Foreach-Object {
+            if($_ -eq $script:LOCALFOLDERPLACEHOLDER -and $value.IndexOf($_) -gt 0) {
+                throw "The placeholder $script:LOCALFOLDERPLACEHOLDER can only be used at the beginning of a string"
+            }
+            $value = $value.Replace($_, $script:XML_PLACEHOLDERS[$_])
+        }
+    }
+
+    return $value
+}
+
 function Update_CollectPath {
     param(
         [string]$nodeName,
@@ -57,10 +80,12 @@ function Update_CollectPath {
 
     # if node is given, we add something
     if ($null -ne $nodeName -and $nodeName -ne "") {
+        $nodeName = Replace_XML_Placeholders -value $nodeName
         $script:variables[$script:COLLECTPATH] += Replace_Seperator -value $nodeName
         Ensure_Seperator
     # If child node is given, we moved down a level and have to remove a portion of the path
     } else {
+        $childNodeName = Replace_XML_Placeholders -value $childNodeName
         $childNodePath = Replace_Seperator -value $childNodeName
         $childNodePath = $childNodePath.TrimEnd($(Get_PathSeperator))
         $childNodePath += $(Get_PathSeperator)

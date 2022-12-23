@@ -82,6 +82,23 @@ InModuleScope DataCollector {
             $output[16].Message | Should -be  "root/"
         }
 
+        # Test 3: Check if wildcards in element names are handled correctly
+        # use the file ./test/testfiles/testspec.xml as XML input file
+        It 'Handles wildcards in element names correctly' {
+            [Xml]$node = Get-Content -Path './test/testfiles/testspec.xml'
+
+            # Capture the output of the TraverseXml function
+            $tmp = $VerbosePreference
+            $VerbosePreference = 'Continue'
+            $output = Traverse_Specification $node.DocumentElement 4>&1
+            $VerbosePreference = $tmp
+
+            # Assert the output
+            $output[1].Message | Should -be  "./te*t*/"
+            $output[3].Message | Should -be  "./te*t*/testfiles/"
+            $output[4].Message | Should -be  "./te*t*/"
+        }
+
         AfterAll {
             $script:variables["collectpath"] = ""
         }
@@ -301,6 +318,22 @@ InModuleScope DataCollector {
                 Assert-MockCalled Copy-Item -Exactly 1
         }
 
+        # test if Copy-File supports wildcards in the source xml element name
+        # mocks Copy_File
+        # expectes that Copy_File is called with the correct $source './test/testfiles/test.txt'
+        It 'should support wildcards in the source xml element name' {
+            Mock Copy_File {}
+
+            $node = [Xml]@"
+            <action-copy-file>test.txt</action-copy-file>
+"@
+            $script:variables["destinationpath"] = "./test/testfiles/testdestination/"
+            $script:variables["collectpath"] = "./te*t/testfiles/"
+            Copy-File -node $node.DocumentElement
+
+            Assert-MockCalled Copy_File -Exactly 1
+        }
+
         AfterEach {
             $script:variables["destinationpath"] = ""
             $script:variables["collectpath"] = ""
@@ -331,6 +364,65 @@ InModuleScope DataCollector {
             Copy_File -source $source -destination $destination
 
             Assert-MockCalled Copy-Item -Exactly 1 -ParameterFilter { $Destination -eq $destination }
+        }
+    }
+}
+
+# unittests for Replace_XML_Placeholders in the module DataCollector.
+InModuleScope DataCollector {
+    Describe 'Replace_XML_Placeholders' {
+        It 'should replace the wildcard * with the string' {
+            $teststring = "testWILD-test"
+            $result = Replace_XML_Placeholders -value $teststring
+
+            $result | should -be "test*test"
+        }
+
+        It 'should do nothing if there is no wildcard placeholder in the string' {
+            $teststring = "testtest"
+            $result = Replace_XML_Placeholders -value $teststring
+
+            $result | should -be "testtest"
+        }
+
+        It 'should do nothing if the string is empty' {
+            $teststring = ""
+            $result = Replace_XML_Placeholders -value $teststring
+
+            $result | should -be ""
+        }
+
+        It 'should return an empty string if the inputvalue is null' {
+            $teststring = $null
+            $result = Replace_XML_Placeholders -value $teststring
+
+            $result | should -be ""
+        }
+
+        It 'should replace the -LOCALFOLDER- placeholder with .' {
+            $teststring = "LOCALFOLDER-test"
+            $result = Replace_XML_Placeholders -value $teststring
+
+            $result | should -be ".test"
+        }
+
+        It 'should throw an exception if the -LOCALFOLDER- is not at the beginning of the string' {
+            $teststring = "test-LOCALFOLDER-"
+            { Replace_XML_Placeholders -value $teststring } | Should -Throw
+        }
+
+        It 'should do nothing if the case is the exact same case as the placeholder' {
+            $teststring = "wild-test"
+            $result = Replace_XML_Placeholders -value $teststring
+
+            $result | should -be "wild-test"
+        }
+
+        It 'should replace the WILD- placeholder if the placeholder is at the end of the string' {
+            $teststring = "testWILD-"
+            $result = Replace_XML_Placeholders -value $teststring
+
+            $result | should -be "test*"
         }
     }
 }
