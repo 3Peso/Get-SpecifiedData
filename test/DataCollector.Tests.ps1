@@ -284,9 +284,53 @@ InModuleScope DataCollector {
                 { Copy-File -node $node.DocumentElement } | Should -Throw
         }
 
+        # test that mocks Copy-Item and not Copy_File
+        # ensure that the mock of Copy-Item is been called
+        It 'should call Copy-Item' {
+            Mock Copy-Item {}
+            Mock Get-Item { return "test"}
+            Mock Test-Path { return $true }
+
+            $node = [Xml]@"
+                <test>test.txt</test>
+"@
+                $script:variables["destinationpath"] = "./test/testfiles/testdestination/"
+                $script:variables["collectpath"] = "./test/testfiles/test2.txt"
+                Copy-File -node $node.DocumentElement
+
+                Assert-MockCalled Copy-Item -Exactly 1
+        }
+
         AfterEach {
             $script:variables["destinationpath"] = ""
             $script:variables["collectpath"] = ""
+        }
+    }
+}
+
+# unittests for the function Copy_File in the module DataCollector.
+# mock the call to Copy-Item as simple as possible
+# ensure that the mock of Copy-Item is been called
+InModuleScope DataCollector {
+    Describe 'Copy_File' {
+        It 'should call Copy-Item' {
+            Mock Copy-Item {}
+
+            $source = "./test/testfiles/test.txt"
+            $destination = "./test/testfiles/testdestination"
+            Copy_File -source $source -destination $destination
+
+            Assert-MockCalled Copy-Item -Exactly 1
+        }
+
+        It 'should call Copy-Item with the correct parameters' {
+            Mock Copy-Item {}
+
+            $source = "./test/testfiles/test.txt"
+            $destination = "./test/testfiles/testdestination"
+            Copy_File -source $source -destination $destination
+
+            Assert-MockCalled Copy-Item -Exactly 1 -ParameterFilter { $Destination -eq $destination }
         }
     }
 }
