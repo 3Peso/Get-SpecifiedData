@@ -1,7 +1,7 @@
 <C:_>
-    <users_xerxes>
+    <users_someuser>
         <action-copy-file>SomeFile.txt</action-copy-file>
-    </users_xerxes>
+    </users_someuser>
     <!-- elements that describe the path to the hosts file -->
     <Windows_System32_drivers_etc>
         <action-copy-file>hosts</action-copy-file>
