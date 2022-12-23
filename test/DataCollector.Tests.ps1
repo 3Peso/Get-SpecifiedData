@@ -83,7 +83,7 @@ InModuleScope DataCollector {
         }
 
         AfterAll {
-            $script:variables["currentpath"] = ""
+            $script:variables["collectpath"] = ""
         }
     }
 
@@ -148,7 +148,7 @@ InModuleScope DataCollector {
 }
 
 # three unittests for the function Ensure_Seperator in the module DataCollector.
-# Use $script:variables["currentpath"] to access the variable currentpath in the module
+# Use $script:variables["collectpath"] to access the variable collectpath in the module
 InModuleScope DataCollector {
     Describe 'Ensure_Seperator' {
         It 'should add a seperator if the collectpath is not empty' {
