@@ -183,6 +183,7 @@ function Get-SpecifiedData {
 #region Actions
 function Copy-File {
     param(
+        [Parameter(Mandatory=$true)]
         [System.Xml.XmlElement]$node
     )
     # get help for Get-Help
