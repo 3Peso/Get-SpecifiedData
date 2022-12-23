@@ -1,0 +1,25 @@
+<C:_>
+    <users_xerxes>
+        <action-copy-file>SomeFile.txt</action-copy-file>
+    </users_xerxes>
+    <!-- elements that describe the path to the hosts file -->
+    <Windows_System32_drivers_etc>
+        <action-copy-file>hosts</action-copy-file>
+    </Windows_System32_drivers_etc>
+    <!-- elements that describe the path to all .evtx files -->
+    <Windows_System32_winevt_Logs>
+        <action-copy-file>*.evtx</action-copy-file>
+    </Windows_System32_winevt_Logs>
+    <!-- elements that describe the path to all files which are windows logs -->
+    <Windows>
+        <action-copy-file>*.log</action-copy-file>
+    </Windows>
+    <!-- elements that describe the path to firewall logs-->
+    <Windows_System32_logfiles_firewall>
+        <action-copy-file>fwlog*.log</action-copy-file>
+    </Windows_System32_logfiles_firewall>
+    <!-- elements that describe the path to all files which are network logs -->
+    <Windows_System32_logfiles>
+        <action-copy-file>*.log</action-copy-file>
+    </Windows_System32_logfiles>
+</C:_>
